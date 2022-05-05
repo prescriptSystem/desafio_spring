@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+	
+	<meta charset="utf-8">
+	<title>Cadastro de Matrícula</title>
+	<object th:include="fragments/cabecalho :: header" th:remove="tag"></object>
+	
+</head>
+<body>
+	<div th:insert="fragments/menu :: header"></div>
+	<br/>
+	
+	<div class="container">
+		<h2><span><i class="fa-solid fa-id-card"></i>&nbsp;CADASTRO DE MATRÍCULA</span></h2>
+		<form method="POST" th:action="@{/matricula/adicionar}" th:object="${matricula}" enctype="multipart/form-data">
+			<div class="row g-3">
+				
+				<div class="col-md-5">
+					<div class="form-group ged_require">
+						<label for="pessoa" class="form-label">Alunos</label>
+						<select th:field="*{aluno}" th:classappend="${#fields.hasErrors('aluno')} ? is-invalid" class="form-select fstdropdown-select">
+							<option value="">SELECIONE</option>
+						    <option th:each="i : ${todosAlunos}" th:value="${i.id}" th:text="${i.cpf} +' - '+ ${i.nome}">
+						    </option>
+						</select>
+					</div>
+				</div>
+				<div class="col-2">
+					<div class="form-check form-switch">
+					  <input class="form-check-input" type="checkbox" th:classappend="${#fields.hasErrors('habilitado')} ? is-invalid" id="habilitado" th:field="*{habilitado}">
+					  <label class="form-check-label" for="flexSwitchCheckChecked">Habilitado</label>
+					</div>
+				</div>
+				
+				
+				
+				
+				<div class="col-12">
+					
+					<button type="submit" class="btn btn-primary">Salvar</button>
+					
+				</div>
+				<div class="col-12">
+					
+					<div class="alert alert-success" role="alert" th:text="${mensagem}" th:if="${not #strings.isEmpty(mensagem)}"></div>
+					<div class="alert alert-danger" th:if="${#fields.hasAnyErrors()}">
+						<div th:each="detailedError : ${#fields.detailedErrors()}">
+							<span th:text="${detailedError.message}"></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<fieldset>
+				<legend><span class="legend"><i class="fas fa-save"></i>&nbsp;Matrículas Cadastradas</span></legend>
+					<div class="row">
+						<div class="col-12">
+							<table id="matriculaTable" class="table table-striped" style="width:100%">
+			      
+						       <!-- Header Table -->
+						       <thead>
+						            <tr>
+					                 	<th>Matrícula</th>
+						                <th>Cpf</th>
+										<th>Nome</th>
+										<th>Data de Nascimento</th>
+										<th>Bairro</th>
+										<th>Ações</th>
+						            </tr>
+						        </thead>
+						        <tbody>
+			        				<tr th:each="matriculas :${todasMatriculas}">
+			        					<td th:text="${matriculas.id}"></td>
+			        					<td th:text="${matriculas.aluno?.cpf}"></td>
+			        					<td th:text="${matriculas.aluno?.nome}"></td>
+			        					<td th:text="${#temporals.format(matriculas.aluno?.dataDeNascimento, 'dd/MM/yyyy')}"></td>
+			        					<td th:text="${matriculas.aluno?.bairro}"></td>
+			        					<td><a th:href="@{'/matricula/editar/' + ${matriculas.id}}"><img th:src="@{/img/edit.svg}" width="10%"/></a><img th:if="${matriculas.habilitado}" title="Habilitado" th:src="@{/img/on.svg}" /><img th:unless="${matriculas.habilitado}" title="Desabilitado" th:src="@{/img/off.svg}" /></td>
+						        	</tr>
+						        </tbody>
+						        <tfoot>
+						            <tr>
+					                 	<th>Id</th>
+						                <th>Cpf</th>
+										<th>Nome</th>
+										<th>Data de Nascimento</th>
+										<th>Bairro</th>
+										<th>Ações</th>
+						            </tr>
+						        </tfoot>
+						    </table>
+						</div>	    
+					</div>
+				</fieldset>
+	</form>
+	</div>
+	
+		
+</body>
+<object th:include="fragments/scripts" th:remove="tag"></object>
+<script type="text/javascript">
+ $(document).ready(function() {
+	
+    $('#matriculaTable').DataTable();
+    
+ });
+
+</script>
+</html>

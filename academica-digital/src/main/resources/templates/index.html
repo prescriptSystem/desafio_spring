@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+	
+	<meta charset="utf-8">
+	<title>Cadastro de Aluno</title>
+	<object th:include="fragments/cabecalho :: header" th:remove="tag"></object>
+	
+</head>
+<body>
+	<div th:insert="fragments/menu :: header"></div>
+	<br/>
+	
+	<div class="container" >
+		<div class="row">
+			<div class="col-12" style="text-align: center;">
+				<img th:src="@{/img/carrefour.png}" width="60%"/>
+			</div>
+		</div>			
+	</div>
+	
+		
+</body>
+<object th:include="fragments/scripts" th:remove="tag"></object>
+
+</html>

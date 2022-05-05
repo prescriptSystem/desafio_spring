@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+	
+	<meta charset="utf-8">
+	<title>Cadastro de Avaliação Física</title>
+	<object th:include="fragments/cabecalho :: header" th:remove="tag"></object>
+	
+</head>
+<body>
+	<div th:insert="fragments/menu :: header"></div>
+	<br/>
+	
+	<div class="container">
+		<h2><span><i class="fa-solid fa-dumbbell"></i>&nbsp;CADASTRO DE AVALIAÇÃO FÍSICA</span></h2>
+		<form method="POST" th:action="@{/avaliacaoFisica/adicionar}" th:object="${avaliacaoFisica}" enctype="multipart/form-data">
+			<div class="row g-3">
+				
+				<div class="col-5">
+					<div class="form-group ged_require">
+						<label for="matricula" class="form-label">Matrícula</label>
+						<select th:field="*{matricula}" th:classappend="${#fields.hasErrors('matricula')} ? is-invalid" class="form-select fstdropdown-select">
+							<option value="">SELECIONE</option>
+						    <option th:each="i : ${todasMatriculasHabilitadas}" th:value="${i.id}" th:text="${i.aluno.cpf} +' - '+ ${i.aluno.nome}">
+						    </option>
+						</select>
+					</div>
+				</div>
+				<div class="col-2">
+					<div class="form-group ged_require" >
+						<label for="peso" class="form-label">Peso</label>
+						<div class="input-group">
+							<input type="number" step="0.01" class="form-control" th:onkeyup="calcularIMC()"  th:classappend="${#fields.hasErrors('peso')} ? is-invalid" th:field="*{peso}">
+							<span class="input-group-text" id="basic-addon2">Kg</span>
+						</div>
+  					</div>
+				</div>
+				<div class="col-2">
+					<div class="form-group ged_require" >
+						<label for="altura" class="form-label">Altura</label>
+						<div class="input-group">
+							<input type="number" step="0.01" class="form-control" th:onkeyup="calcularIMC()"  th:classappend="${#fields.hasErrors('altura')} ? is-invalid" th:field="*{altura}">
+							<span class="input-group-text" id="basic-addon2">M</span>
+						</div>
+  					</div>
+				</div>
+				
+				<div class="col-2">
+					<div class="form-group ged_require" >
+						<label for="imc" class="form-label">IMC</label>
+						<input type="number" class="form-control" th:classappend="${#fields.hasErrors('imc')} ? is-invalid" th:field="*{imc}" readonly="readonly">
+  					</div>
+				</div>
+				
+				
+				
+				
+				
+				<div class="col-12">
+					
+					<button type="submit" class="btn btn-primary">Salvar</button>
+					
+				</div>
+				<div class="col-12">
+					
+					<div class="alert alert-success" role="alert" th:text="${mensagem}" th:if="${not #strings.isEmpty(mensagem)}"></div>
+					<div class="alert alert-danger" th:if="${#fields.hasAnyErrors()}">
+						<div th:each="detailedError : ${#fields.detailedErrors()}">
+							<span th:text="${detailedError.message}"></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<fieldset>
+				<legend><span class="legend"><i class="fas fa-save"></i>&nbsp;Avaliações Físicas Cadastradas</span></legend>
+					<div class="row">
+						<div class="col-12">
+							<table id="avaliacaoFisicaTable" class="table table-striped" style="width:100%">
+			      
+						       <!-- Header Table -->
+						       <thead>
+						            <tr>
+					                 	<th>Matrícula</th>
+						                <th>Cpf</th>
+										<th>Nome</th>
+										<th>Peso</th>
+										<th>Altura</th>
+										<th>IMC</th>
+										<th>Data da Avaliação</th>
+										<th>Ações</th>
+						            </tr>
+						        </thead>
+						        <tbody>
+			        				<tr th:each="avaliacoes :${todasAvaliacoesFisicas}">
+			        					<td th:text="${avaliacoes.id}"></td>
+			        					<td th:text="${avaliacoes.matricula?.aluno?.cpf}"></td>
+			        					<td th:text="${avaliacoes.matricula?.aluno?.nome}"></td>
+			        					<td th:text="${avaliacoes.peso}"></td>
+			        					<td th:text="${avaliacoes.altura}"></td>
+			        					<td th:text="${avaliacoes.imc}"></td>
+			        					<td th:text="${#temporals.format(avaliacoes.dataDaAvaliacao, 'dd/MM/yyyy')}"></td>
+			        					<td><a th:href="@{'/avaliacaoFisica/editar/' + ${avaliacoes.id}}"><img th:src="@{/img/edit.svg}" width="10%"/></a><a href="javascript:void(0)" th:data-avaliacao-id="|${avaliacoes.id}|" th:data-avaliacao-aluno-nome="|${avaliacoes.matricula.aluno.nome}|" th:data-avaliacao-dataAvaliacao="|${#temporals.format(avaliacoes.dataDaAvaliacao, 'dd/MM/yyyy')}|" th:onclick="chamarModal(this.getAttribute('data-avaliacao-id'), this.getAttribute('data-avaliacao-aluno-nome'), this.getAttribute('data-avaliacao-dataAvaliacao'))"><img th:src="@{/img/delete.svg}" width="10%"/></a></td>
+						        	</tr>
+						        </tbody>
+						        <tfoot>
+						            <tr>
+					                 	<th>Matrícula</th>
+						                <th>Cpf</th>
+										<th>Nome</th>
+										<th>Peso</th>
+										<th>Altura</th>
+										<th>IMC</th>
+										<th>Data da Avaliação</th>
+										<th>Ações</th>
+						            </tr>
+						        </tfoot>
+						    </table>
+						</div>	    
+					</div>
+				</fieldset>
+	</form>
+	</div>
+	
+	<!-- Modal -->
+	<div class="modal fade" id="deletarAvalicaoFisicaModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel"><img th:src="@{/img/delete.svg}" width="10%"/>Deletar Avaliação Física</h5>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	      </div>
+	      <div class="modal-body">
+	        
+	      </div>
+	      <div class="modal-footer">
+	      	<form method="POST" th:action="@{/avaliacaoFisica/excluir}">
+	      		<input type="hidden" class="form-control" name="idAvaliacaoExcluida"  id="idAvaliacaoExcluida" >
+	        	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+	        	<button type="submit" class="btn btn-primary">Excluir</button>
+	        </form>	
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+		
+</body>
+<object th:include="fragments/scripts" th:remove="tag"></object>
+<script type="text/javascript">
+	$(document).ready(function() {
+		
+    	$('#avaliacaoFisicaTable').DataTable();
+    	
+    	
+    	
+    	
+    	
+	});
+	
+	function calcularIMC()
+	{
+		let peso = $('#peso').val();
+    	let altura = $('#altura').val();
+    	
+    	$('#imc').val((peso/altura**2).toFixed(2));	
+	}
+	
+	function chamarModal(avaliacao_id, nome_aluno, data_avaliacao)
+	{
+		console.log(avaliacao_id);
+		$('.modal-body').empty();
+		$('.modal-body').append("Tem certeza que deseja excluir a avaliação física do Aluno "+nome_aluno+" - Realizada em: "+data_avaliacao );
+		$("#idAvaliacaoExcluida").val(avaliacao_id);
+		$("#deletarAvalicaoFisicaModal").modal('show');
+	}
+
+</script>
+</html>
